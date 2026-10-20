@@ -407,6 +407,16 @@
         <option value="18">18</option>
       </select>
     </div>
+    <div class="hdr-select-wrap">
+      <div class="hdr-select-label">危険度</div>
+      <select class="hdr-select" id="dangerSelect" onchange="setDangerFilter(this.value)">
+        <option value="all">すべて</option>
+        <option value="none">問題なし</option>
+        <option value="caution">要注意</option>
+        <option value="danger">危険</option>
+        <option value="unset">未設定</option>
+      </select>
+    </div>
   </div>
 </div>
  
@@ -473,6 +483,7 @@ const LS_KEY = 'sejour_memo_v1';
 let songs = [], memoData = {}, currentKey = null, memoTimer = null;
  
 let fGrade = 'all';
+let fDanger = 'all';
  
 function getMemo(key) {
   return memoData[key] || { danger:'', mirror:'', judge:'', memo:'' };
@@ -518,6 +529,14 @@ function setGradeFilter(val) {
   applyFilters();
 }
  
+/* ── DANGER DROPDOWN ── */
+function setDangerFilter(val) {
+  fDanger = val;
+  const sel = document.getElementById('dangerSelect');
+  sel.className = 'hdr-select' + (val !== 'all' ? ' active' : '');
+  applyFilters();
+}
+
 /* ── SEARCH ── */
 function onSearchInput() {
   const val = document.getElementById('searchInput').value;
@@ -538,6 +557,10 @@ function applyFilters() {
     if (q && !s.title.toLowerCase().includes(q) && !(s.reading && s.reading.includes(q))) return false;
     if (fGrade === '17' && s.level > 17.5) return false;
     if (fGrade === '18' && (s.level < 18.0 || s.level >= 19.0)) return false;
+    if (fDanger !== 'all') {
+      const d = getMemo(s.key).danger || '';
+      if (fDanger === 'unset' ? d !== '' : d !== fDanger) return false;
+    }
     return true;
   });
  
